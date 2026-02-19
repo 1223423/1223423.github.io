@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cerne.sh</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+
+      canvas {
+        position: fixed;
+        inset: 0;
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+      }
+
+      #s {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translate(0, 0);
+        transform-origin: center center;
+        z-index: 3;
+        color: #fff;
+        font-family: "JetBrains Mono", monospace;
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        user-select: none;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+    </style>
+    <noscript>
+      <style>
+        #s {
+          left: 50%;
+          top: 90px;
+          transform: translateX(-50%);
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <div id="s">under construction :)</div>
+    <script>
+      const d = document, w = window, s = d.getElementById("s"), c = d.createElement("canvas"), g = c.getContext("2d");
+      d.body.append(c);
+      const R = 0.95, F = 0.36, D = 0.0067, O = 0.5, A = 4.2, K = 4.6, V = 1520, M = 1700, W = 6.2, B = 170, Y = 90, T = 0.75, m = 1.4, rR = 0.92, fR = 0.34, dR = 0.01, oR = 0.18, vS = 1800, wS = 10;
+      const r = { x: 180, y: 140, vx: 280, vy: 205, ax: 0, ay: 0, t: 0, o: 0.06, k: 0, w: 160, h: 112 };
+      const u = { on: 0, id: 0, x: 0, y: 0, t: 0, vx: 0, vy: 0, lx: 0, ly: 0 };
+      const q = { on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0 };
+      const i = new Image();
+      let z = 0, X = 0, H = 0, P = 1, L = performance.now();
+      const n = (v, a, b) => (v < a ? a : v > b ? b : v);
+      const vv = (x, y, m0) => {
+        const h = Math.hypot(x, y);
+        return h > m0 && h ? { x: (x * m0) / h, y: (y * m0) / h } : { x, y };
+      };
+      const ap = (a) => {
+        let x = 0, y = 0;
+        for (let k = 0; k < a.length; k += 1) x += a[k].x, y += a[k].y;
+        const j = a.length || 1;
+        return { x: x / j, y: y / j };
+      };
+      const pr = (p, x, y) => {
+        let l = Infinity, h = -Infinity;
+        for (let k = 0; k < p.length; k += 1) {
+          const d0 = p[k].x * x + p[k].y * y;
+          if (d0 < l) l = d0;
+          if (d0 > h) h = d0;
+        }
+        return { l, h };
+      };
+      const sp = (p, x, y) => {
+        let b = p[0], d0 = b.x * x + b.y * y;
+        for (let k = 1; k < p.length; k += 1) {
+          const t = p[k].x * x + p[k].y * y;
+          if (t > d0) d0 = t, b = p[k];
+        }
+        return b;
+      };
+      const v0 = () => {
+        const s0 = Math.hypot(r.vx, r.vy), d0 = s0 > 6 ? Math.atan2(r.vy, r.vx) : r.t, k0 = n(r.k, 0, 1.8), sx = 1 + k0 * 0.28, sy = n(1 - k0 * 0.2, 0.68, 1);
+        return { d: d0, r: r.t - d0, sx, sy };
+      };
+      const ow = (x, y, v) => {
+        const c1 = Math.cos(v.r), s1 = Math.sin(v.r);
+        let x1 = c1 * x - s1 * y, y1 = s1 * x + c1 * y;
+        x1 *= v.sx;
+        y1 *= v.sy;
+        const c2 = Math.cos(v.d), s2 = Math.sin(v.d);
+        return { x: c2 * x1 - s2 * y1, y: s2 * x1 + c2 * y1 };
+      };
+      const lw = (x, y, v) => {
+        const o = ow(x, y, v);
+        return { x: r.x + o.x, y: r.y + o.y };
+      };
+      const wl = (x, y, v) => {
+        const dx = x - r.x, dy = y - r.y, c2 = Math.cos(v.d), s2 = Math.sin(v.d);
+        let x1 = c2 * dx + s2 * dy, y1 = -s2 * dx + c2 * dy;
+        x1 /= v.sx;
+        y1 /= v.sy;
+        const c1 = Math.cos(v.r), s1 = Math.sin(v.r);
+        return { x: c1 * x1 + s1 * y1, y: -s1 * x1 + c1 * y1 };
+      };
+      const rc = (v) => {
+        const hw = r.w * 0.5, hh = r.h * 0.5;
+        return [lw(-hw, -hh, v), lw(hw, -hh, v), lw(hw, hh, v), lw(-hw, hh, v)];
+      };
+      const sc = () => {
+        const hw = q.w * 0.5, hh = q.h * 0.5, c0 = Math.cos(q.t), s0 = Math.sin(q.t);
+        return [
+          { x: q.x + c0 * -hw - s0 * -hh, y: q.y + s0 * -hw + c0 * -hh },
+          { x: q.x + c0 * hw - s0 * -hh, y: q.y + s0 * hw + c0 * -hh },
+          { x: q.x + c0 * hw - s0 * hh, y: q.y + s0 * hw + c0 * hh },
+          { x: q.x + c0 * -hw - s0 * hh, y: q.y + s0 * -hw + c0 * hh }
+        ];
+      };
+      const ir = (v) => Math.max(((r.w * v.sx) ** 2 + (r.h * v.sy) ** 2) / 12, 1);
+      const is = () => Math.max((m * (q.w * q.w + q.h * q.h)) / 12, 1);
+      const rr = (v) => Math.hypot(r.w * v.sx * 0.5, r.h * v.sy * 0.5);
+      const cr = () => {
+        const a = vv(r.ax, r.ay, M), b = vv(r.vx, r.vy, V);
+        r.ax = a.x;
+        r.ay = a.y;
+        r.vx = b.x;
+        r.vy = b.y;
+        r.o = n(r.o, -W, W);
+      };
+      const cq = () => {
+        const a = vv(q.vx, q.vy, vS);
+        q.vx = a.x;
+        q.vy = a.y;
+        q.o = n(q.o, -wS, wS);
+      };
+      const sat = (a, b, ca, cb) => {
+        let o = Infinity, nx = 0, ny = 0;
+        const t = (p) => {
+          for (let k = 0; k < p.length; k += 1) {
+            const p0 = p[k], p1 = p[(k + 1) % p.length], ex = p1.x - p0.x, ey = p1.y - p0.y, h = Math.hypot(ex, ey);
+            if (h < 1e-6) continue;
+            const ax = -ey / h, ay = ex / h, A0 = pr(a, ax, ay), B0 = pr(b, ax, ay), ov = Math.min(A0.h, B0.h) - Math.max(A0.l, B0.l);
+            if (ov <= 0) return 0;
+            if (ov < o) o = ov, nx = ax, ny = ay;
+          }
+          return 1;
+        };
+        if (!t(a) || !t(b)) return 0;
+        if ((ca.x - cb.x) * nx + (ca.y - cb.y) * ny < 0) nx *= -1, ny *= -1;
+        return { nx, ny, o };
+      };
+      const rw = (nx, ny, p, v) => {
+        const I = ir(v), rx = p.x - r.x, ry = p.y - r.y, vx = r.vx - r.o * ry, vy = r.vy + r.o * rx, vn = vx * nx + vy * ny;
+        if (vn >= 0) return;
+        const rn = rx * ny - ry * nx, dn = 1 + (rn * rn) / I, jn = (-(1 + R) * vn) / Math.max(dn, 1e-6);
+        r.vx += jn * nx;
+        r.vy += jn * ny;
+        r.o += (rn * jn) / I;
+        const tx = -ny, ty = nx, pvx = r.vx - r.o * ry, pvy = r.vy + r.o * rx, vt = pvx * tx + pvy * ty, rt = rx * ty - ry * tx, dt = 1 + (rt * rt) / I;
+        let jt = -vt / Math.max(dt, 1e-6);
+        const jm = F * Math.abs(jn);
+        jt = n(jt, -jm, jm);
+        r.vx += jt * tx;
+        r.vy += jt * ty;
+        r.o += (rt * jt) / I;
+      };
+      const rb = () => {
+        for (let j = 0; j < 3; j += 1) {
+          const v = v0(), p = rc(v);
+          let lx = Infinity, rx = -Infinity, ty = Infinity, by = -Infinity;
+          for (let k = 0; k < 4; k += 1) lx = Math.min(lx, p[k].x), rx = Math.max(rx, p[k].x), ty = Math.min(ty, p[k].y), by = Math.max(by, p[k].y);
+          let h = 0;
+          if (lx < 0) {
+            const d0 = -lx;
+            r.x += d0;
+            rw(1, 0, ap(p.filter((e) => e.x <= lx + 0.5).map((e) => ({ x: e.x + d0, y: e.y }))), v);
+            h = 1;
+          }
+          if (rx > X) {
+            const d0 = rx - X;
+            r.x -= d0;
+            rw(-1, 0, ap(p.filter((e) => e.x >= rx - 0.5).map((e) => ({ x: e.x - d0, y: e.y }))), v);
+            h = 1;
+          }
+          if (ty < 0) {
+            const d0 = -ty;
+            r.y += d0;
+            rw(0, 1, ap(p.filter((e) => e.y <= ty + 0.5).map((e) => ({ x: e.x, y: e.y + d0 }))), v);
+            h = 1;
+          }
+          if (by > H) {
+            const d0 = by - H;
+            r.y -= d0;
+            rw(0, -1, ap(p.filter((e) => e.y >= by - 0.5).map((e) => ({ x: e.x, y: e.y - d0 }))), v);
+            h = 1;
+          }
+          cr();
+          if (!h) break;
+        }
+      };
+      const hit = (x, y) => {
+        const p = wl(x, y, v0());
+        return Math.abs(p.x) <= r.w * 0.5 && Math.abs(p.y) <= r.h * 0.5;
+      };
+      const sz = () => {
+        const w0 = i.naturalWidth || 1, h0 = i.naturalHeight || 1, a = w0 / h0;
+        if (!(a > 0)) return;
+        if (a >= 1) r.w = B, r.h = B / a;
+        else r.h = B, r.w = B * a;
+        r.w = n(r.w, 86, 300);
+        r.h = n(r.h, 70, 300);
+      };
+      const sm = () => {
+        const t = s.style.transform;
+        s.style.transform = "translate(0px,0px) rotate(0rad)";
+        const b = s.getBoundingClientRect();
+        s.style.transform = t;
+        q.w = Math.max(1, b.width);
+        q.h = Math.max(1, b.height);
+      };
+      const sa = () => {
+        q.x = X * 0.5;
+        q.y = Y + q.h * 0.5;
+        q.t = 0;
+        q.vx = 0;
+        q.vy = 0;
+        q.o = 0;
+      };
+      const st = () => {
+        s.style.transform = `translate(${q.x - q.w * 0.5}px,${q.y - q.h * 0.5}px) rotate(${q.t}rad)`;
+      };
+      const rel = (p, nx, ny) => {
+        q.on = 1;
+        q.vx = r.vx * 0.88 + nx * 80;
+        q.vy = r.vy * 0.88 + ny * 80;
+        const rx = p.x - q.x, ry = p.y - q.y, I = is(), tx = -ny, ty = nx, vt = r.vx * tx + r.vy * ty;
+        q.o = n((rx * q.vy - ry * q.vx) / I + vt * 0.02, -wS, wS);
+        cq();
+        r.vx *= 0.84;
+        r.vy *= 0.84;
+        r.o *= 0.92;
+        cr();
+      };
+      const rs = (nx, ny, p, v) => {
+        const mb = q.on ? 1 / m : 0, Ia = 1 / ir(v), Ib = q.on ? 1 / is() : 0, rax = p.x - r.x, ray = p.y - r.y, rbx = p.x - q.x, rby = p.y - q.y;
+        const vax = r.vx - r.o * ray, vay = r.vy + r.o * rax, vbx = q.vx - q.o * rby, vby = q.vy + q.o * rbx, rvx = vax - vbx, rvy = vay - vby, vn = rvx * nx + rvy * ny;
+        if (vn >= 0) return 0;
+        const ran = rax * ny - ray * nx, rbn = rbx * ny - rby * nx, dn = 1 + mb + ran * ran * Ia + rbn * rbn * Ib, jn = (-(1 + R) * vn) / Math.max(dn, 1e-6), inx = jn * nx, iny = jn * ny;
+        r.vx += inx;
+        r.vy += iny;
+        r.o += (rax * iny - ray * inx) * Ia;
+        q.vx -= inx * mb;
+        q.vy -= iny * mb;
+        q.o -= (rbx * iny - rby * inx) * Ib;
+        const pvax = r.vx - r.o * ray, pvay = r.vy + r.o * rax, pvbx = q.vx - q.o * rby, pvby = q.vy + q.o * rbx, trx = pvax - pvbx, try0 = pvay - pvby;
+        let tx = trx - (trx * nx + try0 * ny) * nx, ty = try0 - (trx * nx + try0 * ny) * ny;
+        const tl = Math.hypot(tx, ty);
+        if (tl > 1e-6) tx /= tl, ty /= tl;
+        else tx = -ny, ty = nx;
+        const rat = rax * ty - ray * tx, rbt = rbx * ty - rby * tx, dt = 1 + mb + rat * rat * Ia + rbt * rbt * Ib;
+        let jt = (-(trx * tx + try0 * ty)) / Math.max(dt, 1e-6);
+        const mu = q.on ? (F + fR) * 0.5 : F, jm = mu * Math.abs(jn);
+        jt = n(jt, -jm, jm);
+        const itx = jt * tx, ity = jt * ty;
+        r.vx += itx;
+        r.vy += ity;
+        r.o += (rax * ity - ray * itx) * Ia;
+        q.vx -= itx * mb;
+        q.vy -= ity * mb;
+        q.o -= (rbx * ity - rby * itx) * Ib;
+        return -vn;
+      };
+      const cs = () => {
+        if (q.w <= 0 || q.h <= 0) return;
+        const v = v0(), a = rc(v), b = sc(), k = sat(a, b, { x: r.x, y: r.y }, { x: q.x, y: q.y });
+        if (!k) return;
+        const ib = q.on ? 1 / m : 0, tt = 1 + ib, cp = Math.max(k.o - 0.15, 0) * 0.92;
+        r.x += k.nx * cp * (1 / tt);
+        r.y += k.ny * cp * (1 / tt);
+        if (q.on) q.x -= k.nx * cp * (ib / tt), q.y -= k.ny * cp * (ib / tt);
+        const p1 = sp(a, -k.nx, -k.ny), p2 = sp(b, k.nx, k.ny), p = { x: (p1.x + p2.x) * 0.5, y: (p1.y + p2.y) * 0.5 };
+        const hs = Math.hypot(r.vx, r.vy), clv = rs(k.nx, k.ny, p, v);
+        cr();
+        if (q.on) cq();
+        if (!q.on && hs >= V * T && clv > 40) rel(p, k.nx, k.ny);
+      };
+      const sw = (nx, ny, p) => {
+        const im = 1 / m, ii = 1 / is(), rx = p.x - q.x, ry = p.y - q.y, vx = q.vx - q.o * ry, vy = q.vy + q.o * rx, vn = vx * nx + vy * ny;
+        if (vn >= 0) return;
+        const rn = rx * ny - ry * nx, dn = im + rn * rn * ii, jn = (-(1 + rR) * vn) / Math.max(dn, 1e-6);
+        q.vx += jn * nx * im;
+        q.vy += jn * ny * im;
+        q.o += rn * jn * ii;
+        const tx = -ny, ty = nx, pvx = q.vx - q.o * ry, pvy = q.vy + q.o * rx, vt = pvx * tx + pvy * ty, rt = rx * ty - ry * tx, dt = im + rt * rt * ii;
+        let jt = -vt / Math.max(dt, 1e-6);
+        const jm = fR * Math.abs(jn);
+        jt = n(jt, -jm, jm);
+        q.vx += jt * tx * im;
+        q.vy += jt * ty * im;
+        q.o += rt * jt * ii;
+      };
+      const ws = () => {
+        for (let j = 0; j < 3; j += 1) {
+          const p = sc();
+          let h = 0;
+          const L0 = p.filter((e) => e.x < 0);
+          if (L0.length) {
+            let d0 = 0;
+            for (let k = 0; k < L0.length; k += 1) d0 = Math.max(d0, -L0[k].x);
+            q.x += d0;
+            sw(1, 0, ap(L0.map((e) => ({ x: e.x + d0, y: e.y }))));
+            h = 1;
+          }
+          const R0 = p.filter((e) => e.x > X);
+          if (R0.length) {
+            let d0 = 0;
+            for (let k = 0; k < R0.length; k += 1) d0 = Math.max(d0, R0[k].x - X);
+            q.x -= d0;
+            sw(-1, 0, ap(R0.map((e) => ({ x: e.x - d0, y: e.y }))));
+            h = 1;
+          }
+          const T0 = p.filter((e) => e.y < 0);
+          if (T0.length) {
+            let d0 = 0;
+            for (let k = 0; k < T0.length; k += 1) d0 = Math.max(d0, -T0[k].y);
+            q.y += d0;
+            sw(0, 1, ap(T0.map((e) => ({ x: e.x, y: e.y + d0 }))));
+            h = 1;
+          }
+          const B0 = p.filter((e) => e.y > H);
+          if (B0.length) {
+            let d0 = 0;
+            for (let k = 0; k < B0.length; k += 1) d0 = Math.max(d0, B0[k].y - H);
+            q.y -= d0;
+            sw(0, -1, ap(B0.map((e) => ({ x: e.x, y: e.y - d0 }))));
+            h = 1;
+          }
+          cq();
+          if (!h) break;
+        }
+      };
+      const uq = (dt) => {
+        if (!q.on) return sa(), st();
+        q.x += q.vx * dt;
+        q.y += q.vy * dt;
+        q.t += q.o * dt;
+        ws();
+        const e = Math.exp(-dR * dt);
+        q.vx *= e;
+        q.vy *= e;
+        q.o *= Math.exp(-oR * dt);
+        cq();
+        st();
+      };
+      const pd = (e) => {
+        if (!hit(e.clientX, e.clientY)) return;
+        u.on = 1;
+        u.id = e.pointerId;
+        u.x = e.clientX;
+        u.y = e.clientY;
+        u.t = performance.now();
+        u.vx = 0;
+        u.vy = 0;
+        const p = wl(e.clientX, e.clientY, v0());
+        u.lx = p.x;
+        u.ly = p.y;
+        r.ax = r.ay = 0;
+        r.vx *= 0.22;
+        r.vy *= 0.22;
+        r.o *= 0.45;
+        if (c.setPointerCapture) c.setPointerCapture(e.pointerId);
+      };
+      const pm = (e) => {
+        if (!u.on || e.pointerId !== u.id) return;
+        const t = performance.now(), dt = Math.max(0.001, (t - u.t) / 1000), x = e.clientX, y = e.clientY;
+        u.vx = u.vx * 0.68 + ((x - u.x) / dt) * 0.32;
+        u.vy = u.vy * 0.68 + ((y - u.y) / dt) * 0.32;
+        const v = v0(), o = ow(u.lx, u.ly, v);
+        r.x = x - o.x;
+        r.y = y - o.y;
+        const rr0 = o.x * o.x + o.y * o.y;
+        if (rr0 > 25) r.o = r.o * 0.65 + ((o.x * u.vy - o.y * u.vx) / rr0) * 0.35;
+        else r.o *= 0.84;
+        const b = rr(v0());
+        r.x = n(r.x, b, Math.max(b, X - b));
+        r.y = n(r.y, b, Math.max(b, H - b));
+        r.o = n(r.o, -W, W);
+        u.x = x;
+        u.y = y;
+        u.t = t;
+      };
+      const pu = (id) => {
+        if (!u.on || (id !== undefined && id !== u.id)) return;
+        u.on = 0;
+        if (c.releasePointerCapture && u.id) {
+          try {
+            c.releasePointerCapture(u.id);
+          } catch {}
+        }
+        r.vx = u.vx;
+        r.vy = u.vy;
+        r.ax = r.ay = 0;
+        cr();
+        const v = v0(), o = ow(u.lx, u.ly, v), rr0 = o.x * o.x + o.y * o.y;
+        if (rr0 > 16) r.o = r.o * 0.7 + ((o.x * r.vy - o.y * r.vx) / rr0) * 0.3;
+        r.o = n(r.o, -W, W);
+        r.k = n(0.2 + (Math.hypot(r.vx, r.vy) / V) * 1.2, 0, 1.8);
+        u.id = 0;
+      };
+      const rz = () => {
+        P = w.devicePixelRatio || 1;
+        X = w.innerWidth;
+        H = w.innerHeight;
+        c.width = Math.max(1, Math.round(X * P));
+        c.height = Math.max(1, Math.round(H * P));
+        c.style.width = `${X}px`;
+        c.style.height = `${H}px`;
+        g.setTransform(P, 0, 0, P, 0, 0);
+        g.imageSmoothingEnabled = true;
+        g.imageSmoothingQuality = "high";
+        const b = rr(v0());
+        r.x = n(r.x, b, Math.max(b, X - b));
+        r.y = n(r.y, b, Math.max(b, H - b));
+        sm();
+        if (!q.on) sa();
+        st();
+      };
+      const ur = (dt) => {
+        if (!u.on) {
+          const e = Math.exp(-A * dt);
+          r.ax *= e;
+          r.ay *= e;
+          r.vx += r.ax * dt;
+          r.vy += r.ay * dt;
+          cr();
+          r.x += r.vx * dt;
+          r.y += r.vy * dt;
+          cs();
+          rb();
+          const d0 = Math.exp(-D * dt);
+          r.vx *= d0;
+          r.vy *= d0;
+          r.o *= Math.exp(-O * dt);
+        } else {
+          r.vx = u.vx;
+          r.vy = u.vy;
+          r.ax = r.ay = 0;
+        }
+        r.k *= Math.exp(-K * dt);
+        cr();
+        r.t += r.o * dt;
+      };
+      const dr = () => {
+        const v = v0();
+        g.save();
+        g.translate(r.x, r.y);
+        g.rotate(v.d);
+        g.scale(v.sx, v.sy);
+        g.rotate(v.r);
+        if (z) g.drawImage(i, -r.w * 0.5, -r.h * 0.5, r.w, r.h);
+        else g.fillStyle = "#fff", g.fillRect(-r.w * 0.5, -r.h * 0.5, r.w, r.h);
+        g.strokeStyle = "rgba(255,255,255,.9)";
+        g.lineWidth = 2;
+        g.strokeRect(-r.w * 0.5, -r.h * 0.5, r.w, r.h);
+        g.restore();
+      };
+      const fr = (ts) => {
+        const dt = Math.min(0.04, (ts - L) / 1000 || 0.016);
+        L = ts;
+        ur(dt);
+        uq(dt);
+        g.clearRect(0, 0, X, H);
+        dr();
+        requestAnimationFrame(fr);
+      };
+      i.onload = () => (z = 1, sz(), rz());
+      i.onerror = () => (z = 0);
+      i.src = new URLSearchParams(location.search).get("img") || "./rigby.png";
+      w.addEventListener("resize", rz);
+      c.addEventListener("pointerdown", pd);
+      w.addEventListener("pointermove", pm);
+      w.addEventListener("pointerup", (e) => pu(e.pointerId));
+      w.addEventListener("pointercancel", (e) => pu(e.pointerId));
+      if (d.fonts && d.fonts.ready) d.fonts.ready.then(() => (sm(), q.on || sa(), st()));
+      rz();
+      requestAnimationFrame(fr);
+    </script>
+  </body>
+</html>
