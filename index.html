@@ -105,8 +105,8 @@
         let x1 = c1 * x - s1 * y, y1 = s1 * x + c1 * y;
         x1 *= v.sx;
         y1 *= v.sy;
-        const c2 = Math.cos(v.d), s2 = Math.sin(v.d);
-        return { x: c2 * x1 - s2 * y1, y: s2 * x1 + c2 * y1 };
+        const c2 = Math.cos(v.d), s2 = Math.sin(v.d), fx = (v.sx - 1) * r.w * 0.5;
+        return { x: c2 * (x1 + fx) - s2 * y1, y: s2 * (x1 + fx) + c2 * y1 };
       };
       const lw = (x, y, v) => {
         const o = ow(x, y, v);
@@ -115,6 +115,7 @@
       const wl = (x, y, v) => {
         const dx = x - r.x, dy = y - r.y, c2 = Math.cos(v.d), s2 = Math.sin(v.d);
         let x1 = c2 * dx + s2 * dy, y1 = -s2 * dx + c2 * dy;
+        x1 -= (v.sx - 1) * r.w * 0.5;
         x1 /= v.sx;
         y1 /= v.sy;
         const c1 = Math.cos(v.r), s1 = Math.sin(v.r);
@@ -462,6 +463,8 @@
           r.vx = u.vx;
           r.vy = u.vy;
           r.ax = r.ay = 0;
+          r.k = Math.max(r.k, n((Math.hypot(r.vx, r.vy) / V) * 1.2, 0, 1.8));
+          cs();
         }
         r.k *= Math.exp(-K * dt);
         cr();
@@ -472,6 +475,7 @@
         g.save();
         g.translate(r.x, r.y);
         g.rotate(v.d);
+        g.translate((v.sx - 1) * r.w * 0.5, 0);
         g.scale(v.sx, v.sy);
         g.rotate(v.r);
         if (z) g.drawImage(i, -r.w * 0.5, -r.h * 0.5, r.w, r.h);
