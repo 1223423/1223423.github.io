@@ -28,7 +28,8 @@
         z-index: 1;
       }
 
-      #s {
+      #s,
+      #t {
         position: fixed;
         left: 0;
         top: 0;
@@ -46,6 +47,10 @@
         pointer-events: none;
         white-space: nowrap;
       }
+      #t {
+        font-size: 16px;
+        font-weight: 400;
+      }
     </style>
     <noscript>
       <style>
@@ -54,18 +59,28 @@
           top: 90px;
           transform: translateX(-50%);
         }
+        #t {
+          left: 50%;
+          top: auto;
+          bottom: 178px;
+          transform: translateX(-50%);
+        }
       </style>
     </noscript>
   </head>
   <body>
     <div id="s">under construction :)</div>
+    <div id="t">ben at cerne.sh</div>
     <script>
-      const d = document, w = window, s = d.getElementById("s"), c = d.createElement("canvas"), g = c.getContext("2d");
+      const d = document, w = window, s = d.getElementById("s"), t = d.getElementById("t"), c = d.createElement("canvas"), g = c.getContext("2d");
       d.body.append(c);
       const R = 0.95, F = 0.36, D = 0.0067, O = 0.5, A = 4.2, K = 4.6, V = 1520, M = 1700, W = 6.2, B = 170, Y = 90, T = 0.75, m = 1.4, rR = 0.92, fR = 0.34, dR = 0.01, oR = 0.18, vS = 1800, wS = 10;
       const r = { x: 180, y: 140, vx: 280, vy: 205, ax: 0, ay: 0, t: 0, o: 0.06, k: 0, w: 160, h: 112 };
       const u = { on: 0, id: 0, x: 0, y: 0, t: 0, vx: 0, vy: 0, lx: 0, ly: 0 };
-      const q = { on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0 };
+      const qs = [
+        { e: s, on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0, a: 0, r: 0 },
+        { e: t, on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0, a: 1, r: 5 }
+      ];
       const i = new Image();
       let z = 0, X = 0, H = 0, P = 1, L = performance.now();
       const n = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -125,7 +140,7 @@
         const hw = r.w * 0.5, hh = r.h * 0.5;
         return [lw(-hw, -hh, v), lw(hw, -hh, v), lw(hw, hh, v), lw(-hw, hh, v)];
       };
-      const sc = () => {
+      const sc = (q) => {
         const hw = q.w * 0.5, hh = q.h * 0.5, c0 = Math.cos(q.t), s0 = Math.sin(q.t);
         return [
           { x: q.x + c0 * -hw - s0 * -hh, y: q.y + s0 * -hw + c0 * -hh },
@@ -135,7 +150,7 @@
         ];
       };
       const ir = (v) => Math.max(((r.w * v.sx) ** 2 + (r.h * v.sy) ** 2) / 12, 1);
-      const is = () => Math.max((m * (q.w * q.w + q.h * q.h)) / 12, 1);
+      const is = (q) => Math.max((m * (q.w * q.w + q.h * q.h)) / 12, 1);
       const rr = (v) => Math.hypot(r.w * v.sx * 0.5, r.h * v.sy * 0.5);
       const cr = () => {
         const a = vv(r.ax, r.ay, M), b = vv(r.vx, r.vy, V);
@@ -145,7 +160,7 @@
         r.vy = b.y;
         r.o = n(r.o, -W, W);
       };
-      const cq = () => {
+      const cq = (q) => {
         const a = vv(q.vx, q.vy, vS);
         q.vx = a.x;
         q.vy = a.y;
@@ -229,38 +244,40 @@
         r.h = n(r.h, 70, 300);
       };
       const sm = () => {
-        const t = s.style.transform;
-        s.style.transform = "translate(0px,0px) rotate(0rad)";
-        const b = s.getBoundingClientRect();
-        s.style.transform = t;
-        q.w = Math.max(1, b.width);
-        q.h = Math.max(1, b.height);
+        for (let k = 0; k < qs.length; k += 1) {
+          const q = qs[k], t0 = q.e.style.transform;
+          q.e.style.transform = "translate(0px,0px) rotate(0rad)";
+          const b = q.e.getBoundingClientRect();
+          q.e.style.transform = t0;
+          q.w = Math.max(1, b.width);
+          q.h = Math.max(1, b.height);
+        }
       };
-      const sa = () => {
+      const sa = (q) => {
         q.x = X * 0.5;
-        q.y = Y + q.h * 0.5;
+        q.y = q.a ? H - Y - (q.r + 0.5) * q.h : Y + (q.r + 0.5) * q.h;
         q.t = 0;
         q.vx = 0;
         q.vy = 0;
         q.o = 0;
       };
-      const st = () => {
-        s.style.transform = `translate(${q.x - q.w * 0.5}px,${q.y - q.h * 0.5}px) rotate(${q.t}rad)`;
+      const st = (q) => {
+        q.e.style.transform = `translate(${q.x - q.w * 0.5}px,${q.y - q.h * 0.5}px) rotate(${q.t}rad)`;
       };
-      const rel = (p, nx, ny) => {
+      const rel = (q, p, nx, ny) => {
         q.on = 1;
         q.vx = r.vx * 0.88 + nx * 80;
         q.vy = r.vy * 0.88 + ny * 80;
-        const rx = p.x - q.x, ry = p.y - q.y, I = is(), tx = -ny, ty = nx, vt = r.vx * tx + r.vy * ty;
+        const rx = p.x - q.x, ry = p.y - q.y, I = is(q), tx = -ny, ty = nx, vt = r.vx * tx + r.vy * ty;
         q.o = n((rx * q.vy - ry * q.vx) / I + vt * 0.02, -wS, wS);
-        cq();
+        cq(q);
         r.vx *= 0.84;
         r.vy *= 0.84;
         r.o *= 0.92;
         cr();
       };
-      const rs = (nx, ny, p, v) => {
-        const mb = q.on ? 1 / m : 0, Ia = 1 / ir(v), Ib = q.on ? 1 / is() : 0, rax = p.x - r.x, ray = p.y - r.y, rbx = p.x - q.x, rby = p.y - q.y;
+      const rs = (q, nx, ny, p, v) => {
+        const mb = q.on ? 1 / m : 0, Ia = 1 / ir(v), Ib = q.on ? 1 / is(q) : 0, rax = p.x - r.x, ray = p.y - r.y, rbx = p.x - q.x, rby = p.y - q.y;
         const vax = r.vx - r.o * ray, vay = r.vy + r.o * rax, vbx = q.vx - q.o * rby, vby = q.vy + q.o * rbx, rvx = vax - vbx, rvy = vay - vby, vn = rvx * nx + rvy * ny;
         if (vn >= 0) return 0;
         const ran = rax * ny - ray * nx, rbn = rbx * ny - rby * nx, dn = 1 + mb + ran * ran * Ia + rbn * rbn * Ib, jn = (-(1 + R) * vn) / Math.max(dn, 1e-6), inx = jn * nx, iny = jn * ny;
@@ -288,22 +305,22 @@
         q.o -= (rbx * ity - rby * itx) * Ib;
         return -vn;
       };
-      const cs = () => {
+      const cs = (q) => {
         if (q.w <= 0 || q.h <= 0) return;
-        const v = v0(), a = rc(v), b = sc(), k = sat(a, b, { x: r.x, y: r.y }, { x: q.x, y: q.y });
+        const v = v0(), a = rc(v), b = sc(q), k = sat(a, b, { x: r.x, y: r.y }, { x: q.x, y: q.y });
         if (!k) return;
         const ib = q.on ? 1 / m : 0, tt = 1 + ib, cp = Math.max(k.o - 0.15, 0) * 0.92;
         r.x += k.nx * cp * (1 / tt);
         r.y += k.ny * cp * (1 / tt);
         if (q.on) q.x -= k.nx * cp * (ib / tt), q.y -= k.ny * cp * (ib / tt);
         const p1 = sp(a, -k.nx, -k.ny), p2 = sp(b, k.nx, k.ny), p = { x: (p1.x + p2.x) * 0.5, y: (p1.y + p2.y) * 0.5 };
-        const hs = Math.hypot(r.vx, r.vy), clv = rs(k.nx, k.ny, p, v);
+        const hs = Math.hypot(r.vx, r.vy), clv = rs(q, k.nx, k.ny, p, v);
         cr();
-        if (q.on) cq();
-        if (!q.on && hs >= V * T && clv > 40) rel(p, k.nx, k.ny);
+        if (q.on) cq(q);
+        if (!q.on && hs >= V * T && clv > 40) rel(q, p, k.nx, k.ny);
       };
-      const sw = (nx, ny, p) => {
-        const im = 1 / m, ii = 1 / is(), rx = p.x - q.x, ry = p.y - q.y, vx = q.vx - q.o * ry, vy = q.vy + q.o * rx, vn = vx * nx + vy * ny;
+      const sw = (q, nx, ny, p) => {
+        const im = 1 / m, ii = 1 / is(q), rx = p.x - q.x, ry = p.y - q.y, vx = q.vx - q.o * ry, vy = q.vy + q.o * rx, vn = vx * nx + vy * ny;
         if (vn >= 0) return;
         const rn = rx * ny - ry * nx, dn = im + rn * rn * ii, jn = (-(1 + rR) * vn) / Math.max(dn, 1e-6);
         q.vx += jn * nx * im;
@@ -317,16 +334,16 @@
         q.vy += jt * ty * im;
         q.o += rt * jt * ii;
       };
-      const ws = () => {
+      const ws = (q) => {
         for (let j = 0; j < 3; j += 1) {
-          const p = sc();
+          const p = sc(q);
           let h = 0;
           const L0 = p.filter((e) => e.x < 0);
           if (L0.length) {
             let d0 = 0;
             for (let k = 0; k < L0.length; k += 1) d0 = Math.max(d0, -L0[k].x);
             q.x += d0;
-            sw(1, 0, ap(L0.map((e) => ({ x: e.x + d0, y: e.y }))));
+            sw(q, 1, 0, ap(L0.map((e) => ({ x: e.x + d0, y: e.y }))));
             h = 1;
           }
           const R0 = p.filter((e) => e.x > X);
@@ -334,7 +351,7 @@
             let d0 = 0;
             for (let k = 0; k < R0.length; k += 1) d0 = Math.max(d0, R0[k].x - X);
             q.x -= d0;
-            sw(-1, 0, ap(R0.map((e) => ({ x: e.x - d0, y: e.y }))));
+            sw(q, -1, 0, ap(R0.map((e) => ({ x: e.x - d0, y: e.y }))));
             h = 1;
           }
           const T0 = p.filter((e) => e.y < 0);
@@ -342,7 +359,7 @@
             let d0 = 0;
             for (let k = 0; k < T0.length; k += 1) d0 = Math.max(d0, -T0[k].y);
             q.y += d0;
-            sw(0, 1, ap(T0.map((e) => ({ x: e.x, y: e.y + d0 }))));
+            sw(q, 0, 1, ap(T0.map((e) => ({ x: e.x, y: e.y + d0 }))));
             h = 1;
           }
           const B0 = p.filter((e) => e.y > H);
@@ -350,25 +367,64 @@
             let d0 = 0;
             for (let k = 0; k < B0.length; k += 1) d0 = Math.max(d0, B0[k].y - H);
             q.y -= d0;
-            sw(0, -1, ap(B0.map((e) => ({ x: e.x, y: e.y - d0 }))));
+            sw(q, 0, -1, ap(B0.map((e) => ({ x: e.x, y: e.y - d0 }))));
             h = 1;
           }
-          cq();
+          cq(q);
           if (!h) break;
         }
       };
-      const uq = (dt) => {
-        if (!q.on) return sa(), st();
+      const qq = (a, b) => {
+        const pa = sc(a), pb = sc(b), k = sat(pa, pb, { x: a.x, y: a.y }, { x: b.x, y: b.y });
+        if (!k) return;
+        const ma = a.on ? 1 / m : 0, mb = b.on ? 1 / m : 0;
+        if (!ma && !mb) return;
+        const cp = Math.max(k.o - 0.15, 0) * 0.92, mt = ma + mb;
+        a.x += k.nx * cp * (ma / mt);
+        a.y += k.ny * cp * (ma / mt);
+        b.x -= k.nx * cp * (mb / mt);
+        b.y -= k.ny * cp * (mb / mt);
+        const p1 = sp(pa, -k.nx, -k.ny), p2 = sp(pb, k.nx, k.ny), p = { x: (p1.x + p2.x) * 0.5, y: (p1.y + p2.y) * 0.5 };
+        const Ia = a.on ? 1 / is(a) : 0, Ib = b.on ? 1 / is(b) : 0, rax = p.x - a.x, ray = p.y - a.y, rbx = p.x - b.x, rby = p.y - b.y;
+        const vax = a.vx - a.o * ray, vay = a.vy + a.o * rax, vbx = b.vx - b.o * rby, vby = b.vy + b.o * rbx, rvx = vax - vbx, rvy = vay - vby, vn = rvx * k.nx + rvy * k.ny;
+        if (vn >= 0) return;
+        const ran = rax * k.ny - ray * k.nx, rbn = rbx * k.ny - rby * k.nx, dn = ma + mb + ran * ran * Ia + rbn * rbn * Ib, jn = (-(1 + rR) * vn) / Math.max(dn, 1e-6), inx = jn * k.nx, iny = jn * k.ny;
+        a.vx += inx * ma;
+        a.vy += iny * ma;
+        a.o += (rax * iny - ray * inx) * Ia;
+        b.vx -= inx * mb;
+        b.vy -= iny * mb;
+        b.o -= (rbx * iny - rby * inx) * Ib;
+        let tx = rvx - vn * k.nx, ty = rvy - vn * k.ny;
+        const tl = Math.hypot(tx, ty);
+        if (tl > 1e-6) tx /= tl, ty /= tl;
+        else tx = -k.ny, ty = k.nx;
+        const rat = rax * ty - ray * tx, rbt = rbx * ty - rby * tx, dt = ma + mb + rat * rat * Ia + rbt * rbt * Ib;
+        let jt = (-(rvx * tx + rvy * ty)) / Math.max(dt, 1e-6);
+        const jm = fR * Math.abs(jn);
+        jt = n(jt, -jm, jm);
+        const itx = jt * tx, ity = jt * ty;
+        a.vx += itx * ma;
+        a.vy += ity * ma;
+        a.o += (rax * ity - ray * itx) * Ia;
+        b.vx -= itx * mb;
+        b.vy -= ity * mb;
+        b.o -= (rbx * ity - rby * itx) * Ib;
+        cq(a);
+        cq(b);
+      };
+      const uq = (q, dt) => {
+        if (!q.on) return sa(q), st(q);
         q.x += q.vx * dt;
         q.y += q.vy * dt;
         q.t += q.o * dt;
-        ws();
+        ws(q);
         const e = Math.exp(-dR * dt);
         q.vx *= e;
         q.vy *= e;
         q.o *= Math.exp(-oR * dt);
-        cq();
-        st();
+        cq(q);
+        st(q);
       };
       const pd = (e) => {
         if (!hit(e.clientX, e.clientY)) return;
@@ -440,8 +496,10 @@
         r.x = n(r.x, b, Math.max(b, X - b));
         r.y = n(r.y, b, Math.max(b, H - b));
         sm();
-        if (!q.on) sa();
-        st();
+        for (let k = 0; k < qs.length; k += 1) {
+          if (!qs[k].on) sa(qs[k]);
+          st(qs[k]);
+        }
       };
       const ur = (dt) => {
         if (!u.on) {
@@ -453,7 +511,7 @@
           cr();
           r.x += r.vx * dt;
           r.y += r.vy * dt;
-          cs();
+          for (let k = 0; k < qs.length; k += 1) cs(qs[k]);
           rb();
           const d0 = Math.exp(-D * dt);
           r.vx *= d0;
@@ -464,7 +522,7 @@
           r.vy = u.vy;
           r.ax = r.ay = 0;
           r.k = Math.max(r.k, n((Math.hypot(r.vx, r.vy) / V) * 1.2, 0, 1.8));
-          cs();
+          for (let k = 0; k < qs.length; k += 1) cs(qs[k]);
         }
         r.k *= Math.exp(-K * dt);
         cr();
@@ -489,7 +547,14 @@
         const dt = Math.min(0.04, (ts - L) / 1000 || 0.016);
         L = ts;
         ur(dt);
-        uq(dt);
+        for (let k = 0; k < qs.length; k += 1) uq(qs[k], dt);
+        for (let a = 0; a < qs.length; a += 1) {
+          for (let b = a + 1; b < qs.length; b += 1) qq(qs[a], qs[b]);
+        }
+        for (let k = 0; k < qs.length; k += 1) {
+          if (qs[k].on) ws(qs[k]);
+          st(qs[k]);
+        }
         g.clearRect(0, 0, X, H);
         dr();
         requestAnimationFrame(fr);
@@ -502,7 +567,13 @@
       w.addEventListener("pointermove", pm);
       w.addEventListener("pointerup", (e) => pu(e.pointerId));
       w.addEventListener("pointercancel", (e) => pu(e.pointerId));
-      if (d.fonts && d.fonts.ready) d.fonts.ready.then(() => (sm(), q.on || sa(), st()));
+      if (d.fonts && d.fonts.ready) d.fonts.ready.then(() => {
+        sm();
+        for (let k = 0; k < qs.length; k += 1) {
+          if (!qs[k].on) sa(qs[k]);
+          st(qs[k]);
+        }
+      });
       rz();
       requestAnimationFrame(fr);
     </script>
