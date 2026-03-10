@@ -29,10 +29,12 @@
       }
 
       #s,
-      #t {
+      #t,
+      #g {
         position: fixed;
         left: 0;
         top: 0;
+        display: block;
         transform: translate(0, 0);
         transform-origin: center center;
         z-index: 3;
@@ -47,9 +49,21 @@
         pointer-events: none;
         white-space: nowrap;
       }
-      #t {
+      #t,
+      #g {
         font-size: 16px;
         font-weight: 400;
+      }
+      #g,
+      #g:visited {
+        color: #fff;
+        pointer-events: auto;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      #g:hover {
+        color: #9cf;
       }
     </style>
     <noscript>
@@ -65,21 +79,29 @@
           bottom: 178px;
           transform: translateX(-50%);
         }
+        #g {
+          left: 50%;
+          top: auto;
+          bottom: 152px;
+          transform: translateX(-50%);
+        }
       </style>
     </noscript>
   </head>
   <body>
     <div id="s">under construction :)</div>
     <div id="t">ben at cerne.sh</div>
+    <a id="g" href="https://github.com/1223423">GitHub</a>
     <script>
-      const d = document, w = window, s = d.getElementById("s"), t = d.getElementById("t"), c = d.createElement("canvas"), g = c.getContext("2d");
+      const d = document, w = window, s = d.getElementById("s"), t = d.getElementById("t"), gh = d.getElementById("g"), c = d.createElement("canvas"), g = c.getContext("2d");
       d.body.append(c);
       const R = 0.95, F = 0.36, D = 0.0067, O = 0.5, A = 4.2, K = 4.6, V = 1520, M = 1700, W = 6.2, B = 170, Y = 90, T = 0.75, m = 1.4, rR = 0.92, fR = 0.34, dR = 0.01, oR = 0.18, vS = 1800, wS = 10;
       const r = { x: 180, y: 140, vx: 280, vy: 205, ax: 0, ay: 0, t: 0, o: 0.06, k: 0, w: 160, h: 112 };
       const u = { on: 0, id: 0, x: 0, y: 0, t: 0, vx: 0, vy: 0, lx: 0, ly: 0 };
       const qs = [
         { e: s, on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0, a: 0, r: 0 },
-        { e: t, on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0, a: 1, r: 5 }
+        { e: t, on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0, a: 1, r: 5 },
+        { e: gh, on: 0, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, t: 0, o: 0, a: 1, r: 3.7 }
       ];
       const i = new Image();
       let z = 0, X = 0, H = 0, P = 1, L = performance.now(), mx = -1, my = -1;
@@ -265,17 +287,9 @@
       const st = (q) => {
         q.e.style.transform = `translate(${q.x - q.w * 0.5}px,${q.y - q.h * 0.5}px) rotate(${q.t}rad)`;
       };
-      const rel = (q, p, nx, ny) => {
-        q.on = 1;
-        q.vx = r.vx * 0.88 + nx * 80;
-        q.vy = r.vy * 0.88 + ny * 80;
-        const rx = p.x - q.x, ry = p.y - q.y, I = is(q), tx = -ny, ty = nx, vt = r.vx * tx + r.vy * ty;
-        q.o = n((rx * q.vy - ry * q.vx) / I + vt * 0.02, -wS, wS);
-        cq(q);
-        r.vx *= 0.84;
-        r.vy *= 0.84;
-        r.o *= 0.92;
-        cr();
+      const cv = (q, nx, ny, p) => {
+        const rax = p.x - r.x, ray = p.y - r.y, rbx = p.x - q.x, rby = p.y - q.y, rvx = r.vx - r.o * ray - (q.vx - q.o * rby), rvy = r.vy + r.o * rax - (q.vy + q.o * rbx);
+        return -(rvx * nx + rvy * ny);
       };
       const rs = (q, nx, ny, p, v) => {
         const mb = q.on ? 1 / m : 0, Ia = 1 / ir(v), Ib = q.on ? 1 / is(q) : 0, rax = p.x - r.x, ray = p.y - r.y, rbx = p.x - q.x, rby = p.y - q.y;
@@ -310,15 +324,15 @@
         if (q.w <= 0 || q.h <= 0) return;
         const v = v0(), a = rc(v), b = sc(q), k = sat(a, b, { x: r.x, y: r.y }, { x: q.x, y: q.y });
         if (!k) return;
+        const p1 = sp(a, -k.nx, -k.ny), p2 = sp(b, k.nx, k.ny), p = { x: (p1.x + p2.x) * 0.5, y: (p1.y + p2.y) * 0.5 }, hs = Math.hypot(r.vx, r.vy);
+        if (!q.on && hs >= V * T && cv(q, k.nx, k.ny, p) > 40) q.on = 1;
         const ib = q.on ? 1 / m : 0, tt = 1 + ib, cp = Math.max(k.o - 0.15, 0) * 0.92;
         r.x += k.nx * cp * (1 / tt);
         r.y += k.ny * cp * (1 / tt);
         if (q.on) q.x -= k.nx * cp * (ib / tt), q.y -= k.ny * cp * (ib / tt);
-        const p1 = sp(a, -k.nx, -k.ny), p2 = sp(b, k.nx, k.ny), p = { x: (p1.x + p2.x) * 0.5, y: (p1.y + p2.y) * 0.5 };
-        const hs = Math.hypot(r.vx, r.vy), clv = rs(q, k.nx, k.ny, p, v);
+        rs(q, k.nx, k.ny, p, v);
         cr();
         if (q.on) cq(q);
-        if (!q.on && hs >= V * T && clv > 40) rel(q, p, k.nx, k.ny);
       };
       const sw = (q, nx, ny, p) => {
         const im = 1 / m, ii = 1 / is(q), rx = p.x - q.x, ry = p.y - q.y, vx = q.vx - q.o * ry, vy = q.vy + q.o * rx, vn = vx * nx + vy * ny;
